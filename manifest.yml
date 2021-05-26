@@ -1,0 +1,11 @@
+ applications: 
+  - name: facial_expressions
+    routes:
+     - route: gcool.eu-gb.mybluemix.net 
+    memory: 128M
+    buildpack: python_buildpack 
+  - name: facial_expressions-nginx
+    routes:
+     - route: gcool.eu-gb.mybluemix.net/static
+    memory: 128M
+    buildpack: staticfile_buildpack      

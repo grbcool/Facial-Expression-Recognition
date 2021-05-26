@@ -1,0 +1,15 @@
+<html>
+<head>
+    {% load static %}
+    <link rel='stylesheet' type='text/css' href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>Detector</title>
+</head>
+<body>
+<nav class='navbar bg-dark'>
+    <li class='nav-item'>
+        <a class='nav-link' href="facial_expressions">Stop</a>
+    </li>
+</nav>
+    <img id='bg' height=500px width=1100px src="{% url 'facial_expressions:live' %}" >
+</body>
+</html>
