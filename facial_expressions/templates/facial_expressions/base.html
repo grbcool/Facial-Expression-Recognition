@@ -1,12 +1,33 @@
 <!DOCTYPE html>
 <head>
+    <style>
+      #foo {
+        position: fixed;
+        bottom: 5px;
+        left: 5px;
+      }
+    </style>
     <link rel='stylesheet' type='text/css' href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
 <nav class='navbar bg-dark'>
     <li class='nav-item'>
-        <a class='nav-link' href="facial_expressions">Facial Expression Detector</a>
+        <a class='nav-link' href="facial_expressions">Facial Expression Live Detector</a>
+        <a class='nav-link' href="upload" >Upload Photo</a>
     </li>
 </nav>
+<ol>
+<li>Click on upload photo and upload a RGB image to get test the facial expression model.</li>
+<li>Note: Live Detector works on localhost but on server it requires the integration of webcam on user's device with the server
+which is in progress.</li>
+</ol>
+
+<div id="foo">Opencv's Haarcascade classifier is used for face detection.<br>
+Emotion detector is a CNN model with accuracy around 67 %.<br>
+Face detection can be improved by having a more accurate CNN model and <br>
+emotion detector can be imporved by making the model more complex and <br>
+training longer.But it will increase the response time.
+</div>  
+
 
 </body>

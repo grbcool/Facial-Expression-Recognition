@@ -8,7 +8,13 @@ import threading
 import os
 import time
 from tensorflow.keras.models import model_from_json
+from tensorflow.keras.preprocessing.image import img_to_array
 import numpy as np
+import base64
+import io
+from io import BytesIO
+from PIL import Image
+
 #import tensorflow as tf
 #from keras.models import model_from_json
 class FacialExpressionModel():
@@ -36,7 +42,7 @@ base_path=os.path.abspath(os.path.dirname(__file__))
 
 class VideoCamera():
     def __init__(self):
-        self.facec = cv2.CascadeClassifier(os.path.join(base_path,'model/haarcascade_frontalface_default.xml'))
+        self.facec = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
         self.model = FacialExpressionModel(os.path.join(base_path,'model/model.json'),os.path.join(base_path,'model/model_weights.h5'))
         self.video = cv2.VideoCapture(0)
         (self.grabbed,self.frame) = self.video.read()
@@ -67,7 +73,8 @@ class VideoCamera():
             (self.grabbed,self.frame) = self.video.read()
             
             
-
+# \r is the carriage return -escape character. It shifts the cursor to the beginning of string of line
+# and replaces all characters in beginning by the ones after the carriage return.
 def gen(camera):
      while True:
         frame = camera.get_frame()
@@ -88,5 +95,47 @@ def facial_expression_detection(request):
 def base(request):
     return render(request,'facial_expressions/base.html')  
     
+def upload(request):
+    return render(request,'facial_expressions/upload.html')    
+
+def to_data_uri(pil_image):
+    data = BytesIO()
+    pil_image.save(data,'JPEG')
+    data64 = base64.b64encode(data.getvalue())
+    return u'data:img/jpeg;base64,'+data64.decode('utf-8')
+
+def to_image(numpy_img):
+    return Image.fromarray(numpy_img,'RGB')
+
+def recognize(request):
+    img = request.FILES['image']
+    img_file = io.BytesIO(img.read())
+    img_pil = Image.open(img_file)
+    frame = img_to_array(img_pil,data_format='channels_last',dtype='uint8')
+        
+
+    facec = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
+    model = FacialExpressionModel(os.path.join(base_path,'model/model.json'),os.path.join(base_path,'model/model_weights.h5'))
+
+    gray_fr = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    faces = facec.detectMultiScale(gray_fr,1.5,5)
+    for (x, y, w, h) in faces:
+        fc = gray_fr[y:y+h, x:x+w]
+        roi = cv2.resize(fc, (48, 48))
+        pred = model.predict_emotion(roi[np.newaxis, :, :, np.newaxis])
+
+        cv2.putText(frame, pred, (x, y),cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 0), 2)
+        cv2.rectangle(frame,(x,y),(x+w,y+h),(0,255,0),2)
     
-         
+    
+    
+    
+    pil_image = to_image(frame)
+    image_uri = to_data_uri(pil_image)
+
+    context = {'image_uri':image_uri}
+    return render(request,'facial_expressions/index.html',context)
+
+
+
+
